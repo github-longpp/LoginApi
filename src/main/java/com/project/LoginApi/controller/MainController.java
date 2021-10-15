@@ -1,55 +1,34 @@
 package com.project.LoginApi.controller;
 
-import com.project.LoginApi.dao.UserDao;
-import com.project.LoginApi.dto.UserForm;
+import com.project.LoginApi.dao.UserRepository;
 import com.project.LoginApi.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.Valid;
-import javax.validation.Validator;
 import java.util.List;
-import java.util.Set;
 
 @RestController
+@RequestMapping("/api")
 public class MainController {
-
     @Autowired
-    private Validator validator;
-    @Autowired
-    private UserDao userDao;
+    private UserRepository userRepository;
 
-    @GetMapping("/")
-    public String home() {
-        return "Welcome Homepage!!";
-    }
-
-    @GetMapping("/members")
-    public List<User> viewMembers() {
-        List<User> listUser = userDao.getAllUsers();
-        return listUser;
-    }
-
-    @PostMapping(value = "/register")
-    public ResponseEntity<String> saveRegister(@Valid @RequestBody UserForm userForm) {
-        ResponseEntity responseEntity = null;
+    @GetMapping("/users")
+    public ResponseEntity<List<User>> getAllUser() {
         try {
-            Set<ConstraintViolation<UserForm>> failures = validator
-                    .validate(userForm);
-
-            if (!failures.isEmpty()) {
-                ResponseEntity.badRequest();
-
-            } else {
-                userDao.saveUser(userForm);
-            }
-            responseEntity = ResponseEntity.ok("User is valid");
+            List<User> users = userRepository.findAll();
+            return new  ResponseEntity<>(users, HttpStatus.OK);
         } catch (Exception e) {
-            responseEntity = ResponseEntity.badRequest().body("user is available");
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return responseEntity;
     }
+
+//    @PostMapping("/login")
+//    public ResponseEntity login() {
+//
+//    }
 }
